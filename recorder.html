@@ -1,0 +1,1066 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Recorder Teacher</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
+<style>
+/* ---- Theme tokens (cream only) ---- */
+:root {
+  --bg: oklch(0.97 0.015 80);
+  --bg-card: oklch(0.99 0.010 85);
+  --bg-sunken: oklch(0.94 0.020 78);
+  --ink: oklch(0.24 0.020 60);
+  --ink-soft: oklch(0.45 0.020 60);
+  --ink-faint: oklch(0.60 0.015 60);
+  --line: oklch(0.88 0.015 75);
+  --accent: oklch(0.70 0.15 55);
+  --accent-ink: oklch(0.35 0.12 55);
+  --accent-soft: oklch(0.92 0.06 55);
+  --cool: oklch(0.66 0.10 200);
+  --cool-soft: oklch(0.93 0.04 200);
+  --go: oklch(0.72 0.14 155);
+  --go-soft: oklch(0.93 0.05 155);
+  --wood: oklch(0.75 0.09 60);
+  --wood-dark: oklch(0.55 0.10 45);
+  --wood-cap: oklch(0.35 0.06 40);
+  --shadow: 0 1px 0 oklch(0.88 0.015 75), 0 10px 30px -14px oklch(0.3 0.05 60 / .25);
+  --radius: 20px;
+  --radius-sm: 12px;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: 'Nunito', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, .display {
+  font-family: 'Baloo 2', system-ui, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.app {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: clamp(16px, 3vw, 32px) clamp(14px, 3vw, 32px) 60px;
+}
+
+/* ---- Header ---- */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: clamp(16px, 2.5vw, 24px);
+  flex-wrap: wrap;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.logo-mark {
+  width: 44px; height: 44px; border-radius: 12px;
+  background: var(--accent);
+  display: grid; place-items: center;
+  box-shadow: inset 0 -3px 0 oklch(0 0 0 / .12);
+}
+.logo-title {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 800;
+  font-size: clamp(20px, 3vw, 26px);
+  line-height: 1;
+}
+.logo-sub {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin-top: 2px;
+}
+
+/* ---- Layout ---- */
+.grid {
+  display: grid;
+  grid-template-columns: 790px minmax(0, 1fr);
+  gap: clamp(16px, 2vw, 24px);
+  align-items: start;
+}
+@media (max-width: 1100px) {
+  .grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+.card {
+  background: var(--bg-card);
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.card-pad { padding: clamp(16px, 2vw, 22px); }
+.card-title {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 800;
+  font-size: 18px;
+  color: var(--ink);
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.card-title .tag {
+  font-family: 'Nunito', sans-serif;
+  font-size: 11px; font-weight: 800;
+  letter-spacing: .08em; text-transform: uppercase;
+  color: var(--accent-ink);
+  background: var(--accent-soft);
+  padding: 4px 8px; border-radius: 999px;
+}
+
+/* ---- Stage (recorder + now playing) ---- */
+.stage {
+  background: var(--bg-card);
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: clamp(16px, 2vw, 24px);
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: clamp(16px, 2vw, 24px);
+  align-items: stretch;
+}
+@media (max-width: 640px) {
+  .stage { grid-template-columns: minmax(0, 1fr); }
+}
+
+.recorder-column {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.recorder-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 0;
+  user-select: none;
+  flex: 1;
+  min-height: 0;
+}
+.recorder-svg {
+  width: 100%;
+  max-width: 260px;
+  height: auto;
+  max-height: min(62vh, 560px);
+  display: block;
+}
+
+.now-playing {
+  background: var(--bg-sunken);
+  border-radius: var(--radius-sm);
+  padding: clamp(14px, 2vw, 20px);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+.np-label {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.np-note {
+  font-family: 'Baloo 2', sans-serif;
+  font-size: clamp(64px, 12vw, 120px);
+  line-height: 1;
+  font-weight: 800;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  height: clamp(72px, 13vw, 130px);
+  margin-top: 4px;
+}
+.np-note .oct {
+  font-size: clamp(22px, 4vw, 40px);
+  color: var(--ink-faint);
+  font-weight: 700;
+  align-self: flex-end;
+  padding-bottom: clamp(6px, 1.5vw, 14px);
+}
+.np-note.rest {
+  color: var(--ink-faint);
+  font-size: clamp(64px, 12vw, 120px);
+}
+.np-hint {
+  font-size: 14px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+.strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 2px 4px;
+}
+.chip {
+  flex: 0 0 auto;
+  min-width: 44px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--bg-card);
+  border: 2px solid var(--line);
+  text-align: center;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 800;
+  font-size: 20px;
+  color: var(--ink);
+  transition: transform .15s ease, background .15s ease, border-color .15s ease;
+}
+.chip.rest { color: var(--ink-faint); font-size: 18px; }
+.chip.d-w { background: var(--accent-soft); border-color: var(--accent); }
+.chip.d-hd { background: var(--accent-soft); }
+.chip.d-h { background: var(--cool-soft); }
+.chip.d-e { padding: 6px 8px; font-size: 16px; min-width: 36px; }
+.chip.d-s { padding: 4px 6px; font-size: 14px; min-width: 30px; }
+.chip.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+  transform: translateY(-3px) scale(1.06);
+  box-shadow: 0 8px 20px -8px oklch(0.60 0.15 55 / .6);
+}
+.chip.past { opacity: .45; }
+
+/* ---- Transport ---- */
+.transport {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.btn {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 15px;
+  padding: 11px 18px;
+  border-radius: 12px;
+  border: 2px solid var(--line);
+  background: var(--bg-card);
+  color: var(--ink);
+  cursor: pointer;
+  transition: transform .1s ease, background .15s ease, border-color .15s ease;
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.btn:hover { border-color: var(--ink-faint); }
+.btn:active { transform: translateY(1px); }
+.btn.primary {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+  box-shadow: 0 6px 0 -2px oklch(0.55 0.15 55), 0 10px 20px -10px oklch(0.55 0.15 55 / .6);
+}
+.btn.primary:hover { border-color: var(--accent); filter: brightness(1.03); }
+.btn.primary:active { box-shadow: 0 2px 0 -2px oklch(0.55 0.15 55); transform: translateY(2px); }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+
+.tempo {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--bg-card);
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  padding: 8px 14px;
+  flex: 1;
+  min-width: 180px;
+}
+.tempo label {
+  font-size: 11px; font-weight: 800; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--ink-faint);
+}
+.tempo input[type="range"] {
+  flex: 1;
+  min-width: 60px;
+  accent-color: var(--accent);
+}
+.tempo .bpm-val {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 800;
+  font-size: 18px;
+  min-width: 48px;
+  text-align: right;
+}
+
+/* ---- Note input ---- */
+textarea.input {
+  width: 100%;
+  min-height: 90px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: clamp(16px, 2vw, 22px);
+  letter-spacing: .1em;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 2px solid var(--line);
+  background: var(--bg-sunken);
+  color: var(--ink);
+  resize: vertical;
+  outline: none;
+  transition: border-color .15s ease;
+}
+textarea.input:focus { border-color: var(--accent); }
+.input-help {
+  display: flex; flex-wrap: wrap; gap: 8px 16px;
+  font-size: 13px; color: var(--ink-soft);
+  margin-top: 10px;
+}
+.input-help code {
+  font-family: 'JetBrains Mono', monospace;
+  background: var(--bg-sunken);
+  padding: 2px 7px;
+  border-radius: 6px;
+  font-size: 12px;
+  color: var(--ink);
+}
+.note-pad {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px;
+}
+.note-pad button {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 800;
+  font-size: 16px;
+  min-width: 44px; height: 44px;
+  padding: 0 10px;
+  border-radius: 10px;
+  border: 2px solid var(--line);
+  background: var(--bg-card);
+  color: var(--ink);
+  cursor: pointer;
+}
+.note-pad button.rest { min-width: 60px; color: var(--ink-faint); }
+.note-pad button:hover { border-color: var(--accent); }
+
+/* ---- Song list ---- */
+.song-list {
+  display: flex; flex-direction: column; gap: 8px;
+  max-height: 440px; overflow-y: auto;
+  padding-right: 4px;
+}
+.song-list::-webkit-scrollbar { width: 6px; }
+.song-list::-webkit-scrollbar-thumb { background: var(--line); border-radius: 999px; }
+.song-row {
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  background: var(--bg-sunken);
+  cursor: pointer;
+  transition: border-color .12s ease, transform .1s ease;
+}
+.song-row:hover { border-color: var(--line); }
+.song-row.selected {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.song-num {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: var(--bg-card);
+  display: grid; place-items: center;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 800; font-size: 14px;
+  color: var(--ink-soft);
+  border: 2px solid var(--line);
+}
+.song-row.selected .song-num {
+  background: var(--accent); color: white; border-color: var(--accent);
+}
+.song-name {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.1;
+}
+.song-meta {
+  font-size: 12px;
+  color: var(--ink-faint);
+  margin-top: 2px;
+}
+
+/* ---- Explorer ---- */
+.explorer {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 6px;
+}
+@media (max-width: 520px) {
+  .explorer { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+}
+.exp-btn {
+  aspect-ratio: 1;
+  border-radius: 10px;
+  border: 2px solid var(--line);
+  background: var(--bg-card);
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 800;
+  font-size: 15px;
+  cursor: pointer;
+  color: var(--ink);
+}
+.exp-btn:hover { border-color: var(--accent); }
+.exp-btn.active {
+  background: var(--accent); color: white; border-color: var(--accent);
+}
+
+/* ---- Difficulty badges ---- */
+.badge {
+  display: inline-flex; align-items: center;
+  font-size: 10px; font-weight: 800;
+  letter-spacing: .08em; text-transform: uppercase;
+  padding: 3px 7px; border-radius: 6px;
+  background: var(--cool-soft);
+  color: oklch(0.35 0.10 200);
+}
+.badge.easy { background: var(--go-soft); color: oklch(0.38 0.12 155); }
+.badge.med { background: var(--accent-soft); color: var(--accent-ink); }
+
+.muted { color: var(--ink-soft); font-size: 13px; }
+.hstack { display: flex; align-items: center; gap: 8px; }
+.vstack { display: flex; flex-direction: column; gap: 10px; }
+.error {
+  color: oklch(0.50 0.14 25);
+  font-size: 13px;
+  margin-top: 8px;
+  font-weight: 600;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 6px 0 -2px oklch(0.55 0.15 55), 0 0 0 0 oklch(0.70 0.15 55 / .5); }
+  50% { box-shadow: 0 6px 0 -2px oklch(0.55 0.15 55), 0 0 0 12px oklch(0.70 0.15 55 / 0); }
+}
+.btn.primary.playing { animation: pulse 1.2s ease infinite; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
+
+<script type="text/babel">
+// ============================================================
+// DATA — Note fingerings, parser, song library
+// ============================================================
+
+const NOTE_DATA = {
+  "C5":  { freq: 523.25, label: "C",  octave: 5, fingering: [1, 1,1,1, 1,1,1,1] },
+  "D5":  { freq: 587.33, label: "D",  octave: 5, fingering: [1, 1,1,1, 1,1,1,0] },
+  "E5":  { freq: 659.25, label: "E",  octave: 5, fingering: [1, 1,1,1, 1,1,0,0] },
+  "F5":  { freq: 698.46, label: "F",  octave: 5, fingering: [1, 1,1,1, 1,0,1,1] },
+  "G5":  { freq: 783.99, label: "G",  octave: 5, fingering: [1, 1,1,1, 0,0,0,0] },
+  "A5":  { freq: 880.00, label: "A",  octave: 5, fingering: [1, 1,1,0, 0,0,0,0] },
+  "B5":  { freq: 987.77, label: "B",  octave: 5, fingering: [1, 1,0,0, 0,0,0,0] },
+  "C6":  { freq: 1046.5, label: "C",  octave: 6, fingering: [1, 0,1,0, 0,0,0,0] },
+  "D6":  { freq: 1174.7, label: "D",  octave: 6, fingering: [0, 0,1,0, 0,0,0,0] },
+  "E6":  { freq: 1318.5, label: "E",  octave: 6, fingering: [0.5, 1,1,1, 1,1,0,0] },
+  "F6":  { freq: 1396.9, label: "F",  octave: 6, fingering: [0.5, 1,1,0, 1,1,1,0] },
+  "G6":  { freq: 1568.0, label: "G",  octave: 6, fingering: [0.5, 1,1,1, 0,0,0,0] },
+};
+
+const DEFAULT_OCTAVE = { C: 5, D: 5, E: 5, F: 5, G: 5, A: 5, B: 5 };
+const DUR_MAP = { w: 4, h: 2, q: 1, e: 0.5, s: 0.25 };
+
+function parseSong(input) {
+  if (!input) return { tokens: [], error: null };
+  const raw = input.toUpperCase().replace(/\|/g, " ").replace(/[,\/]/g, " ");
+  const parts = raw.split(/\s+/).filter(Boolean);
+  const tokens = [];
+  let error = null;
+
+  for (const p of parts) {
+    if (/^-+$/.test(p)) {
+      for (let i = 0; i < p.length; i++) {
+        tokens.push({ note: null, text: "\u2013", beats: 1 });
+      }
+      continue;
+    }
+    const restMatch = p.match(/^-([WHQES])?(\.?)$/);
+    if (restMatch) {
+      const durCh = (restMatch[1] || "Q").toLowerCase();
+      let beats = DUR_MAP[durCh] || 1;
+      if (restMatch[2] === ".") beats *= 1.5;
+      tokens.push({ note: null, text: "\u2013", beats });
+      continue;
+    }
+    const m = p.match(/^([A-G])([#B]?)(\d)?([WHQES])?(\.?)$/);
+    if (!m) {
+      error = `I don't know "${p}". Try letters A\u2013G (like C, D6), - for a rest. Add h/w/e for longer/shorter notes.`;
+      continue;
+    }
+    const letter = m[1];
+    const acc = m[2];
+    const octStr = m[3];
+    const durCh = (m[4] || "Q").toLowerCase();
+    const dotted = m[5] === ".";
+    if (acc) {
+      error = `Sharps/flats aren't supported yet. Treating "${p}" as ${letter}.`;
+    }
+    const octave = octStr ? parseInt(octStr, 10) : DEFAULT_OCTAVE[letter];
+    const key = `${letter}${octave}`;
+    if (!NOTE_DATA[key]) {
+      error = `"${p}" is outside the soprano range (C5\u2013D6).`;
+      continue;
+    }
+    let beats = DUR_MAP[durCh] || 1;
+    if (dotted) beats *= 1.5;
+    tokens.push({
+      note: key,
+      text: letter + (octave === 6 ? "\u2032" : ""),
+      beats
+    });
+  }
+  return { tokens, error };
+}
+
+const SONGS = [
+  { id: "hcb", name: "Hot Cross Buns", level: "easy", meta: "3 notes \u00b7 B A G", bpm: 100, notes: "B A Gh - B A Gh - G G G G A A A A B A Gh" },
+  { id: "mhall", name: "Mary Had a Little Lamb", level: "easy", meta: "3 notes \u00b7 B A G", bpm: 110, notes: "B A G A B B Bh A A Ah B B Bh B A G A B B B B A A B A Gh" },
+  { id: "imagine", name: "Imagine (John Lennon)", level: "med", meta: "verse + chorus", bpm: 76, notes: "-w -w -w -w -h Ge Ge Ge Ge Be Be Ah -h Ge Ge Ge Be Ae -h -q Ge Ge Be Be Ah Ce Ge Ge Bh. Be Ah -q Ae C6e Ae C6e E6e E6e D6e C6e Ah Bh. Be Be C6e D6e E6e G6e E6e D6e C6e Ge Ge Ge Ge Be Be Ah Ce Ge Ge Ge Be Ah -q Ge Ge Ge Ge Be Be Ah Ce Ge Ge Be Ah -q Ae C6e Ae C6e E6e E6e D6e C6e Ah Bh. Be Be C6e D6e E6e G6e E6e D6e C6e Ae C6e Be C6e Be Ae Ae Be C6h. C6 -e Ae C6e Be Be Ae Ae Eh -q Ae Ae C6e Be C6e Be Ae Be C6 C6 Ae Gh -q. C6e C6e D6e E6e D6e C6e D6e E6e C6 C6h" },
+  { id: "rain", name: "Rain, Rain, Go Away", level: "easy", meta: "3 notes \u00b7 B A G", bpm: 100, notes: "B G A Gh B B Gh A A Gh B B G A Gh" },
+  { id: "twinkle", name: "Twinkle Twinkle Little Star", level: "med", meta: "6 notes \u00b7 C\u2013A", bpm: 110, notes: "C C G G A A Gh F F E E D D Ch G G F F E Eh G G F F E Eh C C G G A A Gh F F E E D D Ch" },
+  { id: "odejoy", name: "Ode to Joy", level: "med", meta: "5 notes \u00b7 E\u2013A", bpm: 120, notes: "E E F G G F E D C C D E Eh. De Dh E E F G G F E D C C D E D C Ch" },
+  { id: "jingle", name: "Jingle Bells", level: "med", meta: "5 notes \u00b7 E\u2013G", bpm: 130, notes: "E E Eh E E Eh E G C D Ew F F F F F E E E E D D E Dh Gh" },
+  { id: "olddog", name: "Old MacDonald", level: "med", meta: "5 notes \u00b7 C\u2013G", bpm: 120, notes: "G G G D E E Dh B B A A Gh D G G G D E E Dh B B A A Gh" },
+  { id: "row", name: "Row Row Row Your Boat", level: "med", meta: "5 notes \u00b7 C\u2013G", bpm: 110, notes: "Ch. Ch. C D Eh. Ee De Ee Fe Gh. Ce Ce Ce Ge Ge Ge Ee Ee Ee Ce Ce Ce Ge Fe Ee De Ch." },
+  { id: "frerejacques", name: "Fr\u00e8re Jacques", level: "med", meta: "6 notes \u00b7 C\u2013A", bpm: 110, notes: "C D E C C D E C E F Gh E F Gh G A G F E C G A G F E C C G Ch C G Ch" },
+];
+
+// ============================================================
+// AUDIO — Web Audio recorder synth
+// ============================================================
+
+class RecorderSynth {
+  constructor() {
+    this.ctx = null;
+    this.master = null;
+  }
+  ensure() {
+    if (this.ctx) return;
+    const AC = window.AudioContext || window.webkitAudioContext;
+    this.ctx = new AC();
+    this.master = this.ctx.createGain();
+    this.master.gain.value = 0.7;
+    const filt = this.ctx.createBiquadFilter();
+    filt.type = "lowpass";
+    filt.frequency.value = 4500;
+    filt.Q.value = 0.3;
+    this.master.connect(filt);
+    filt.connect(this.ctx.destination);
+  }
+  resume() {
+    this.ensure();
+    if (this.ctx.state === "suspended") this.ctx.resume();
+  }
+  play(freq, durationSec) {
+    this.ensure();
+    const ctx = this.ctx;
+    const now = ctx.currentTime;
+
+    const voiceGain = ctx.createGain();
+    voiceGain.gain.value = 0;
+    voiceGain.connect(this.master);
+
+    const oscSine = ctx.createOscillator();
+    oscSine.type = "sine";
+    oscSine.frequency.value = freq;
+
+    const oscTri = ctx.createOscillator();
+    oscTri.type = "triangle";
+    oscTri.frequency.value = freq;
+    const triGain = ctx.createGain();
+    triGain.gain.value = 0.18;
+
+    const oscHarm = ctx.createOscillator();
+    oscHarm.type = "sine";
+    oscHarm.frequency.value = freq * 2;
+    const harmGain = ctx.createGain();
+    harmGain.gain.value = 0.06;
+
+    const lfo = ctx.createOscillator();
+    lfo.frequency.value = 5.2;
+    const lfoGain = ctx.createGain();
+    lfoGain.gain.value = freq * 0.004;
+    lfo.connect(lfoGain);
+    lfoGain.connect(oscSine.frequency);
+    lfoGain.connect(oscTri.frequency);
+
+    const noiseBuf = ctx.createBuffer(1, ctx.sampleRate * 0.4, ctx.sampleRate);
+    const nd = noiseBuf.getChannelData(0);
+    for (let i = 0; i < nd.length; i++) nd[i] = (Math.random() * 2 - 1);
+    const noise = ctx.createBufferSource();
+    noise.buffer = noiseBuf;
+    noise.loop = true;
+    const noiseFilt = ctx.createBiquadFilter();
+    noiseFilt.type = "bandpass";
+    noiseFilt.frequency.value = freq * 1.5;
+    noiseFilt.Q.value = 0.8;
+    const noiseGain = ctx.createGain();
+    noiseGain.gain.value = 0.015;
+    noise.connect(noiseFilt);
+    noiseFilt.connect(noiseGain);
+    noiseGain.connect(voiceGain);
+
+    oscSine.connect(voiceGain);
+    oscTri.connect(triGain);
+    triGain.connect(voiceGain);
+    oscHarm.connect(harmGain);
+    harmGain.connect(voiceGain);
+
+    const attack = 0.035;
+    const release = Math.min(0.18, durationSec * 0.3);
+    const sustainLevel = 0.32;
+    voiceGain.gain.setValueAtTime(0, now);
+    voiceGain.gain.linearRampToValueAtTime(sustainLevel, now + attack);
+    voiceGain.gain.setValueAtTime(sustainLevel, now + Math.max(attack, durationSec - release));
+    voiceGain.gain.linearRampToValueAtTime(0, now + durationSec);
+
+    oscSine.start(now);
+    oscTri.start(now);
+    oscHarm.start(now);
+    lfo.start(now);
+    noise.start(now);
+    oscSine.stop(now + durationSec + 0.05);
+    oscTri.stop(now + durationSec + 0.05);
+    oscHarm.stop(now + durationSec + 0.05);
+    lfo.stop(now + durationSec + 0.05);
+    noise.stop(now + durationSec + 0.05);
+
+    return () => {
+      try {
+        voiceGain.gain.cancelScheduledValues(ctx.currentTime);
+        voiceGain.gain.setValueAtTime(voiceGain.gain.value, ctx.currentTime);
+        voiceGain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.05);
+      } catch(e) {}
+    };
+  }
+}
+
+const synth = new RecorderSynth();
+
+// ============================================================
+// COMPONENTS
+// ============================================================
+
+const { useState, useRef, useMemo, useCallback } = React;
+
+// ---- Recorder SVG ----
+function Recorder({ noteKey }) {
+  const data = noteKey ? NOTE_DATA[noteKey] : null;
+  const f = data ? data.fingering : [0, 0,0,0, 0,0,0,0];
+
+  const W = 240, H = 640;
+  const cx = 130;
+  const capTop = 20;
+  const capBot = 90;
+  const windowTop = 100;
+  const windowBot = 130;
+  const holeStart = 180;
+  const holeGap = 48;
+  const holeY = Array.from({length: 7}, (_, i) => holeStart + i * holeGap);
+  const bellTop = holeY[6] + 55;
+  const bellBot = H - 20;
+  const holeR = 12;
+
+  const bodyPath = `
+    M ${cx - 34} ${capTop}
+    Q ${cx - 44} ${capBot - 6} ${cx - 36} ${capBot}
+    L ${cx - 36} ${windowTop - 4}
+    L ${cx - 40} ${windowTop}
+    L ${cx - 40} ${bellTop}
+    Q ${cx - 52} ${bellBot - 20} ${cx - 40} ${bellBot}
+    L ${cx + 40} ${bellBot}
+    Q ${cx + 52} ${bellBot - 20} ${cx + 40} ${bellTop}
+    L ${cx + 40} ${windowTop}
+    L ${cx + 36} ${windowTop - 4}
+    L ${cx + 36} ${capBot}
+    Q ${cx + 44} ${capBot - 6} ${cx + 34} ${capTop}
+    Z
+  `;
+
+  const renderHole = (x, y, state, key) => {
+    const covered = state === 1;
+    return (
+      <g key={key}>
+        <circle cx={x} cy={y} r={holeR + 3} fill="var(--wood-dark)" />
+        {covered ? (
+          <circle cx={x} cy={y} r={holeR} fill="var(--ink)" />
+        ) : (
+          <circle cx={x} cy={y} r={holeR} fill="var(--bg-card)" stroke="var(--ink)" strokeWidth="2.5" />
+        )}
+      </g>
+    );
+  };
+
+  const thumbState = f[0];
+
+  return (
+    <div className="recorder-wrap">
+      <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet" className="recorder-svg">
+        <defs>
+          <linearGradient id="woodGrad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stopColor="var(--wood-dark)" stopOpacity="0.35" />
+            <stop offset="0.18" stopColor="var(--wood)" stopOpacity="0.05" />
+            <stop offset="0.5" stopColor="var(--wood)" stopOpacity="0" />
+            <stop offset="0.82" stopColor="var(--wood)" stopOpacity="0.05" />
+            <stop offset="1" stopColor="var(--wood-dark)" stopOpacity="0.4" />
+          </linearGradient>
+          <linearGradient id="capGrad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stopColor="var(--wood-cap)" />
+            <stop offset="0.5" stopColor="oklch(0.45 0.07 45)" />
+            <stop offset="1" stopColor="var(--wood-cap)" />
+          </linearGradient>
+        </defs>
+        <path d={bodyPath} fill="var(--wood)" />
+        <path d={bodyPath} fill="url(#woodGrad)" />
+        <path d={bodyPath} fill="none" stroke="var(--wood-dark)" strokeWidth="2" />
+        <rect x={cx - 34} y={capTop} width={68} height={capBot - capTop} fill="url(#capGrad)" rx="4" />
+        <rect x={cx - 34} y={capBot - 6} width={68} height={6} fill="var(--wood-cap)" />
+        <rect x={cx - 14} y={windowTop + 6} width={28} height={18} rx="3" fill="var(--bg-card)" stroke="var(--wood-dark)" strokeWidth="1.5" />
+        <path d={`M ${cx - 14} ${windowTop + 24} L ${cx} ${windowTop + 14} L ${cx + 14} ${windowTop + 24} Z`} fill="var(--wood-cap)" />
+        <rect x={cx - 38} y={windowBot + 8} width={76} height={5} fill="var(--wood-dark)" opacity="0.5" />
+        <rect x={cx - 40} y={bellTop - 6} width={80} height={6} fill="var(--wood-dark)" opacity="0.5" />
+
+        {/* Thumb hole indicator */}
+        <g>
+          <text x={42} y={175} textAnchor="middle" style={{ fontFamily: "'Baloo 2', sans-serif", fontWeight: 800, fontSize: 14, fill: "var(--ink)" }}>THUMB</text>
+          <text x={42} y={192} textAnchor="middle" style={{ fontFamily: "'Nunito', sans-serif", fontWeight: 700, fontSize: 10, letterSpacing: 1, fill: "var(--ink-faint)" }}>(back)</text>
+          <circle cx={42} cy={222} r={holeR + 3} fill="var(--wood-dark)" />
+          {thumbState === 1 ? (
+            <circle cx={42} cy={222} r={holeR} fill="var(--ink)" />
+          ) : (
+            <circle cx={42} cy={222} r={holeR} fill="var(--bg-card)" stroke="var(--ink)" strokeWidth="2.5" />
+          )}
+          <path d={`M ${42 + holeR + 6} ${222} Q ${cx - 55} ${222} ${cx - 42} ${holeY[0] + 6}`} stroke="var(--ink-faint)" strokeWidth="1.5" fill="none" strokeDasharray="3 3" opacity="0.6" />
+        </g>
+
+        {/* 7 front holes */}
+        {holeY.map((y, i) => (
+          <g key={`hole-${i}`}>
+            {renderHole(cx, y, f[i + 1], `h${i}`)}
+            <text x={cx + holeR + 10} y={y + 6} style={{ fontFamily: "'Baloo 2', sans-serif", fontWeight: 800, fontSize: 18, fill: "var(--ink)" }}>{i + 1}</text>
+          </g>
+        ))}
+      </svg>
+    </div>
+  );
+}
+
+// ---- SongList ----
+function SongList({ songs, selectedId, onSelect }) {
+  return (
+    <div className="song-list">
+      {songs.map((s, i) => (
+        <div key={s.id} className={"song-row" + (selectedId === s.id ? " selected" : "")} onClick={() => onSelect(s)}>
+          <div className="song-num">{i + 1}</div>
+          <div>
+            <div className="song-name">{s.name}</div>
+            <div className="song-meta">
+              <span className={"badge " + (s.level === "easy" ? "easy" : "med")}>{s.level}</span>
+              {" "}{s.meta} · {s.bpm} bpm
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ---- NoteInput ----
+function NoteInput({ value, onChange, error }) {
+  const insert = (s) => {
+    const v = (value ? value.trimEnd() + " " : "") + s + " ";
+    onChange(v);
+  };
+  return (
+    <div>
+      <textarea className="input" placeholder="Try:  B A Gh  -h  B A Gh  -h" value={value} onChange={(e) => onChange(e.target.value)} spellCheck={false} />
+      <div className="input-help">
+        <span><code>C D E F G A B</code> = notes</span>
+        <span><code>-</code> = rest</span>
+        <span><code>C6 D6</code> = high notes</span>
+      </div>
+      <div className="input-help" style={{ marginTop: 4 }}>
+        <span><b>Duration:</b> add <code>h</code> = half (2 beats), <code>w</code> = whole (4), <code>e</code> = eighth (½), <code>s</code> = sixteenth (¼).  Add <code>.</code> for dotted (×1.5).</span>
+      </div>
+      <div className="input-help" style={{ marginTop: 2 }}>
+        <span>Examples: <code>Gh</code> = half G · <code>Ae</code> = eighth A · <code>Bh.</code> = dotted half B · <code>-h</code> = half rest</span>
+      </div>
+      <div className="note-pad">
+        {["C","D","E","F","G","A","B"].map(n => (
+          <button key={n} onClick={() => insert(n)} title={`Add ${n}`}>{n}</button>
+        ))}
+        <button onClick={() => insert("C6")} title="High C">C6</button>
+        <button onClick={() => insert("D6")} title="High D">D6</button>
+        <button className="rest" onClick={() => insert("-")} title="Quarter rest">{"\u2013"}</button>
+        <button className="rest" onClick={() => insert("-h")} title="Half rest">{"\u2013"}h</button>
+        <button className="rest" onClick={() => insert("-w")} title="Whole rest">{"\u2013"}w</button>
+      </div>
+      {error && <div className="error">{error}</div>}
+    </div>
+  );
+}
+
+// ---- Explorer ----
+function Explorer({ selected, onSelect }) {
+  const notes = ["C5","D5","E5","F5","G5","A5","B5","C6","D6","E6","F6","G6"];
+  return (
+    <div className="explorer">
+      {notes.map(n => {
+        const d = NOTE_DATA[n];
+        return (
+          <button key={n} className={"exp-btn" + (selected === n ? " active" : "")} onClick={() => onSelect(n)} title={`Play ${d.label}${d.octave}`}>
+            {d.label}{d.octave === 6 ? "\u2032" : ""}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+// ============================================================
+// APP
+// ============================================================
+
+function App() {
+  const [input, setInput] = useState("B A G - B A G - G G G G A A A A B A G -");
+  const { tokens, error } = useMemo(() => parseSong(input), [input]);
+
+  const [bpm, setBpm] = useState(100);
+  const [playing, setPlaying] = useState(false);
+  const [cursor, setCursor] = useState(-1);
+  const [selectedSongId, setSelectedSongId] = useState("hcb");
+  const [explorerNote, setExplorerNote] = useState(null);
+
+  const playRef = useRef({ cancel: false });
+
+  const stop = useCallback(() => {
+    playRef.current.cancel = true;
+    setPlaying(false);
+    setCursor(-1);
+  }, []);
+
+  const play = useCallback(async () => {
+    if (!tokens.length) return;
+    synth.resume();
+    playRef.current.cancel = false;
+    setPlaying(true);
+
+    const beatMs = 60000 / bpm;
+    for (let i = 0; i < tokens.length; i++) {
+      if (playRef.current.cancel) return;
+      const tok = tokens[i];
+      const beats = tok.beats || 1;
+      const stepMs = beatMs * beats;
+      setCursor(i);
+      if (tok.note) {
+        const data = NOTE_DATA[tok.note];
+        const durS = stepMs / 1000 * 0.92;
+        synth.play(data.freq, durS);
+      }
+      await new Promise(r => setTimeout(r, stepMs));
+    }
+    if (!playRef.current.cancel) {
+      setPlaying(false);
+      setCursor(-1);
+    }
+  }, [tokens, bpm]);
+
+  const currentToken = playing && cursor >= 0 ? tokens[cursor] : null;
+  const currentNoteKey = explorerNote || (currentToken && currentToken.note) ||
+    (tokens.find(t => t.note) && tokens.find(t => t.note).note) || "G5";
+  const currentNoteDisplay = explorerNote
+    ? NOTE_DATA[explorerNote]
+    : currentToken
+      ? (currentToken.note ? NOTE_DATA[currentToken.note] : null)
+      : (tokens.find(t => t.note) ? NOTE_DATA[tokens.find(t => t.note).note] : null);
+
+  const selectSong = (s) => {
+    stop();
+    setSelectedSongId(s.id);
+    setInput(s.notes);
+    setBpm(s.bpm);
+    setExplorerNote(null);
+  };
+
+  const tapExplorer = (n) => {
+    synth.resume();
+    setExplorerNote(n);
+    const d = NOTE_DATA[n];
+    synth.play(d.freq, 0.9);
+  };
+
+  return (
+    <div className="app">
+      <div className="header">
+        <div className="logo">
+          <div className="logo-mark">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+              <rect x="10" y="2" width="4" height="18" rx="1.5" fill="white" />
+              <circle cx="12" cy="7" r="1.2" fill="oklch(0.25 0.02 60)" />
+              <circle cx="12" cy="11" r="1.2" fill="oklch(0.25 0.02 60)" />
+              <circle cx="12" cy="15" r="1.2" fill="oklch(0.25 0.02 60)" />
+              <path d="M8 20 Q12 24 16 20" stroke="white" strokeWidth="2" strokeLinecap="round" fill="none" />
+            </svg>
+          </div>
+          <div>
+            <div className="logo-title">Recorder Teacher</div>
+            <div className="logo-sub">Learn songs one note at a time</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid">
+        <div className="vstack" style={{ gap: 20 }}>
+          <div className="stage">
+            <div className="recorder-column">
+              <div className="card-title" style={{ marginBottom: 4 }}>
+                Fingering
+                <span className="tag">Baroque</span>
+              </div>
+              <Recorder noteKey={currentNoteKey} />
+            </div>
+
+            <div className="now-playing">
+              <div>
+                <div className="np-label">Now playing</div>
+                {currentNoteDisplay ? (
+                  <div className="np-note">
+                    {currentNoteDisplay.label}
+                    <span className="oct">{currentNoteDisplay.octave === 6 ? "high" : ""}</span>
+                  </div>
+                ) : currentToken && currentToken.note === null ? (
+                  <div className="np-note rest">rest</div>
+                ) : (
+                  <div className="np-note" style={{ color: "var(--ink-faint)" }}>{"\u2013"}</div>
+                )}
+                <div className="np-hint">
+                  {currentNoteDisplay
+                    ? "Cover the dark holes. Blow gently and steadily."
+                    : "Press play to start \u2014 I'll show you each note as it plays."}
+                </div>
+              </div>
+
+              <div>
+                <div className="np-label" style={{ marginBottom: 8 }}>Song</div>
+                <div className="strip">
+                  {tokens.length === 0 && (
+                    <div className="muted" style={{ padding: "12px 4px" }}>Type some notes below to begin.</div>
+                  )}
+                  {tokens.map((t, i) => {
+                    const beats = t.beats || 1;
+                    const durCls = beats >= 4 ? " d-w" : beats >= 3 ? " d-hd" : beats >= 2 ? " d-h" : beats >= 1 ? " d-q" : beats >= 0.5 ? " d-e" : " d-s";
+                    return (
+                      <div
+                        key={i}
+                        className={
+                          "chip" +
+                          (t.note === null ? " rest" : "") +
+                          durCls +
+                          (i === cursor ? " active" : "") +
+                          (cursor >= 0 && i < cursor ? " past" : "")
+                        }
+                        title={beats + " beat" + (beats !== 1 ? "s" : "")}
+                      >
+                        {t.note === null ? "\u2013" : t.text}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="transport">
+                {!playing ? (
+                  <button className="btn primary" onClick={play} disabled={!tokens.length}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4 L20 12 L6 20 Z"/></svg>
+                    Play
+                  </button>
+                ) : (
+                  <button className="btn primary playing" onClick={stop}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
+                    Stop
+                  </button>
+                )}
+                <div className="tempo">
+                  <label>Tempo</label>
+                  <input type="range" min="40" max="180" step="1" value={bpm} onChange={(e) => setBpm(parseInt(e.target.value, 10))} />
+                  <div className="bpm-val">{bpm}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="card card-pad">
+            <div className="card-title">
+              Type your song
+              <span className="tag">Letters &amp; dashes</span>
+            </div>
+            <NoteInput
+              value={input}
+              onChange={(v) => { setInput(v); setSelectedSongId(null); setExplorerNote(null); }}
+              error={error}
+            />
+          </div>
+        </div>
+
+        <div className="vstack" style={{ gap: 20 }}>
+          <div className="card card-pad">
+            <div className="card-title">
+              Song library
+              <span className="tag">{SONGS.length} tunes</span>
+            </div>
+            <SongList songs={SONGS} selectedId={selectedSongId} onSelect={selectSong} />
+          </div>
+
+          <div className="card card-pad">
+            <div className="card-title">
+              Note explorer
+              <span className="tag">Tap a note</span>
+            </div>
+            <p className="muted" style={{ margin: "0 0 12px" }}>
+              Tap any note to hear it and see exactly which holes to cover.
+            </p>
+            <Explorer selected={explorerNote} onSelect={tapExplorer} />
+          </div>
+
+          <div className="card card-pad">
+            <div className="card-title">How to hold the recorder</div>
+            <ol style={{ paddingLeft: 18, margin: 0, lineHeight: 1.7, color: "var(--ink-soft)", fontSize: 14 }}>
+              <li><b>Left hand on top</b> — thumb covers the back hole.</li>
+              <li><b>Right hand below</b> — thumb rests on the back for balance.</li>
+              <li>Rest the mouthpiece on your bottom lip. Don't bite!</li>
+              <li>Blow gently, like whispering <i>"too"</i>.</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
